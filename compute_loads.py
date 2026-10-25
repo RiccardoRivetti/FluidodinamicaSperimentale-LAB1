@@ -91,4 +91,4 @@ if __name__ == "__main__":
     CD, CL, CM, alpha = get_coefficients(DATA,E,K_WT,tested_wing)
 
     # Export load coefficients
-    export_coefficients(output_folder+"/load_coefficients.csv", alpha, CD, CL, CM)
+    export_coefficients(output_folder+"/coefficients.csv", alpha, CD, CL, CM)
