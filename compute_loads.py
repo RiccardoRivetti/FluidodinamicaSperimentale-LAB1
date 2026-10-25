@@ -10,9 +10,15 @@ class Wing:
 def import_data(test_data):
     # Import test data
     data = np.loadtxt(test_data, delimiter=",", skiprows=1)
-    data = data[np.argsort(data[:,-1])] # Sort data with ascending angle
 
-    return data
+    # Extract zero measure
+    zero = data[0,:]
+    data = np.delete(data, 0, axis=0)
+
+    # Sort data with ascending angle
+    data = data[np.argsort(data[:,-1])]
+
+    return data, zero
 
 def import_calibration(evaluation_matrix,WT_calibration):
     # Import evaluation matrix
@@ -24,13 +30,18 @@ def import_calibration(evaluation_matrix,WT_calibration):
 
     return E, K_WT
 
-def get_coefficients(DATA,E,K_WT,tested_wing):
+def get_coefficients(DATA,ZERO,E,K_WT,tested_wing):
     # Get vector of angles
     alpha = DATA[:,8]
 
     # Compute wing parameters
     c = tested_wing.chord
     S = c*tested_wing.span
+
+    # Compute loads in the zero wind condition
+    S_zero = ZERO[0:3]
+    S_zero = S_zero.reshape(3,1)
+    F_zero = E @ S_zero
 
     # Initialize coefficients arrays
     CD = np.zeros(len(alpha))
@@ -45,10 +56,12 @@ def get_coefficients(DATA,E,K_WT,tested_wing):
 
         # Compute loads in cell axes
         F = E @ S_loads
+        F -= F_zero
 
         # Compute loads in wind axes
-        D = -(F[0,0]*np.cos(alpha[i]) - F[1,0]*np.sin(alpha[i])) 
-        L = F[0,0]*np.sin(alpha[i]) + F[1,0]*np.cos(alpha[i])
+        alpha_rad = np.deg2rad(alpha[i])
+        D = -(F[0,0]*np.cos(alpha_rad) + F[1,0]*np.sin(alpha_rad))
+        L = -(-F[0,0]*np.sin(alpha_rad) + F[1,0]*np.cos(alpha_rad))
         M = F[2,0]
 
         # Compute dynamic pressure
@@ -58,7 +71,6 @@ def get_coefficients(DATA,E,K_WT,tested_wing):
         CD[i] = D/(q*S)
         CL[i] = L/(q*S)
         CM[i] = M/(q*S*c)
-        print(alpha[i])
 
     return CD, CL, CM, alpha
 
@@ -84,11 +96,11 @@ if __name__ == "__main__":
     tested_wing = Wing("NACA0015",0.100,0.294)
 
     # Import data and calibration parameters
-    DATA = import_data(input_file)
+    DATA, ZERO = import_data(input_file)
     E, K_WT = import_calibration("./Calibration/E.csv","./Calibration/WT.csv")
 
     # Compute load coefficients
-    CD, CL, CM, alpha = get_coefficients(DATA,E,K_WT,tested_wing)
+    CD, CL, CM, alpha = get_coefficients(DATA,ZERO,E,K_WT,tested_wing)
 
     # Export load coefficients
     export_coefficients(output_folder+"/coefficients.csv", alpha, CD, CL, CM)
