@@ -103,8 +103,8 @@ if __name__ == "__main__":
     args = ap.parse_args()
     weight_file = args.weight_file
 
-    # weight_file = "./DATA/weights_measure.csv"
-    hook_file = "./DATA/hook_measure.csv"
+    # weight_file = "./Data/weights_measure.csv"
+    hook_file = "./Data/hook_measure.csv"
     output_folder = "./Calibration"
 
     DATA = np.loadtxt(weight_file, delimiter=",", skiprows=1)

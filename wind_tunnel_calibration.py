@@ -65,7 +65,7 @@ if __name__ == "__main__":
     show_plot = args.plot
 
 
-    # wind_file = "./DATA/wind_measure.csv"
+    # wind_file = "./Data/wind_measure.csv"
     output_folder = "./Calibration"
 
     # Extract pressure data
