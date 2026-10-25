@@ -1,0 +1,9 @@
+WIND TUNNEL CALIBRATION
+Data: Data/wind_measure.csv
+Pressure transducer sensitivity = 200.000 Pa/V
+
+--- Fit ch1-ch0 = K*ch2 ---
+slope = 1.159701
+intercept = -0.006218
+R^2 = 0.999996
+standard error = 0.001306
