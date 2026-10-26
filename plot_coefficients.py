@@ -6,9 +6,44 @@ bluepoli1 = "#102C53"
 bluepoli2 = "#0BA4FF"
 bluepoli3 = "#67B2C6"
 
-def plot_coefficient(alpha, coeff, name, show_plot):
+class Polar:
+    def __init__(self, alpha, CD, CL, CM):
+        self.alpha = alpha
+        self.CD = CD
+        self.CL = CL
+        self.CM = CM
+
+def import_coefficients(filename):
+    coeffs = np.loadtxt(filename, delimiter=",", skiprows=1)
+
+    alpha = coeffs[:,0]
+    CD = coeffs[:,1]
+    CL = coeffs[:,2]
+    CM = coeffs[:,3]
+
+    polar = Polar(alpha,CD,CL,CM)
+
+    return polar
+
+def select_coefficient(polar,name):
+    match name:
+        case "C_D":
+            return polar.CD
+        case "C_L":
+            return polar.CL
+        case "C_M":
+            return polar.CM
+        case _:
+            raise NameError
+
+def plot_coefficient(polar_data, polar_xfoil, name, show_plot):
     fig, ax = plt.subplots()
-    ax.plot(alpha,coeff,label="Data",marker="s",color=bluepoli1)
+
+    coeff_data = select_coefficient(polar_data,name)
+    coeff_xfoil = select_coefficient(polar_xfoil,name)
+
+    ax.plot(polar_data.alpha,coeff_data,label="Data",marker="s",color=bluepoli1)
+    ax.plot(polar_xfoil.alpha,coeff_xfoil,label="xfoil",color=bluepoli2,linestyle="--")
 
     plt.grid(True,linestyle="--",alpha=0.4)
     plt.legend()
@@ -18,9 +53,11 @@ def plot_coefficient(alpha, coeff, name, show_plot):
     if show_plot:
         plt.show()
 
-def plot_polar(CD,CL,show_plot):
+def plot_polar(polar_data, polar_xfoil,show_plot):
     fig, ax = plt.subplots()
-    ax.plot(CD,CL,label="Data",marker="s",color=bluepoli1)
+
+    ax.plot(polar_data.CD,polar_data.CL,label="Data",marker="s",color=bluepoli1)
+    ax.plot(polar_xfoil.CD,polar_xfoil.CL,label="xfoil",color=bluepoli2,linestyle="--")
 
     plt.grid(True,linestyle="--",alpha=0.4)
     plt.legend()
@@ -41,17 +78,14 @@ if __name__ == "__main__":
     input_file = "./Output/coefficients.csv"
     show_plot = True
 
-    # Import computed coefficients
-    coeffs = np.loadtxt(input_file, delimiter=",", skiprows=1)
-    alpha = coeffs[:,0]
-    CD = coeffs[:,1]
-    CL = coeffs[:,2]
-    CM = coeffs[:,3]
+    # Import computed coefficients and xfoil coefficients
+    polar_data = import_coefficients(input_file)
+    polar_xfoil = import_coefficients("./Output/xfoil_coefficients.csv")
 
     # Plot coefficients
-    plot_coefficient(alpha, CD, "C_D", show_plot)
-    plot_coefficient(alpha, CL, "C_L", show_plot)
-    plot_coefficient(alpha, CM, "C_M", show_plot)
+    plot_coefficient(polar_data, polar_xfoil, "C_D", show_plot)
+    plot_coefficient(polar_data, polar_xfoil, "C_L", show_plot)
+    plot_coefficient(polar_data, polar_xfoil, "C_M", show_plot)
 
     # Plot polar
-    plot_polar(CD,CL,show_plot)
+    plot_polar(polar_data, polar_xfoil,show_plot)

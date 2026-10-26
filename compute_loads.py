@@ -66,6 +66,7 @@ def get_coefficients(DATA,ZERO,E,K_WT,tested_wing):
 
         # Compute dynamic pressure
         q = K_WT*DATA[i,5]
+        # print(np.sqrt(q/(.5*1.225))*1.225*c/1.81e-5)
 
         # Compute coefficients
         CD[i] = D/(q*S)
@@ -100,7 +101,9 @@ if __name__ == "__main__":
     E, K_WT = import_calibration("./Calibration/E.csv","./Calibration/WT.csv")
 
     # Compute load coefficients
+    print("Computing coefficients...")
     CD, CL, CM, alpha = get_coefficients(DATA,ZERO,E,K_WT,tested_wing)
 
     # Export load coefficients
     export_coefficients(output_folder+"/coefficients.csv", alpha, CD, CL, CM)
+    print("Exported coefficients in "+output_folder)
