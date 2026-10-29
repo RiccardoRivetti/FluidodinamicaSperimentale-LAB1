@@ -62,7 +62,7 @@ def get_coefficients(DATA,ZERO,E,K_WT,tested_wing):
         alpha_rad = np.deg2rad(alpha[i])
         D = -(F[0,0]*np.cos(alpha_rad) + F[1,0]*np.sin(alpha_rad))
         L = -(-F[0,0]*np.sin(alpha_rad) + F[1,0]*np.cos(alpha_rad))
-        M = F[2,0]
+        M = -F[2,0]
 
         # Compute dynamic pressure
         q = K_WT*DATA[i,5]
@@ -71,7 +71,7 @@ def get_coefficients(DATA,ZERO,E,K_WT,tested_wing):
         # Compute coefficients
         CD[i] = D/(q*S)
         CL[i] = L/(q*S)
-        CM[i] = M/(q*S*c)
+        CM[i] = M/(q*S*c) #+ CL[i]/4
 
     return CD, CL, CM, alpha
 
