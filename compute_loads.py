@@ -71,7 +71,7 @@ def get_coefficients(DATA,ZERO,E,K_WT,tested_wing):
         # Compute coefficients
         CD[i] = D/(q*S)
         CL[i] = L/(q*S)
-        CM[i] = M/(q*S*c) #+ CL[i]/4
+        CM[i] = M/(q*S*c) + CL[i]/4
 
     return CD, CL, CM, alpha
 
