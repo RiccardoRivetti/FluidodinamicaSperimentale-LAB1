@@ -13,13 +13,22 @@ class Polar:
         self.CL = CL
         self.CM = CM
 
-def import_coefficients(filename):
+def select_bounds(coeffs,bounds):
+    alpha = coeffs[:,0]
+    idx_min = np.argwhere(alpha == bounds[0])[0,0]
+    idx_max = np.argwhere(alpha == bounds[1])[0,0] + 1
+
+    return idx_min, idx_max
+
+def import_coefficients(filename,bounds):
     coeffs = np.loadtxt(filename, delimiter=",", skiprows=1)
 
-    alpha = coeffs[:,0]
-    CD = coeffs[:,1]
-    CL = coeffs[:,2]
-    CM = coeffs[:,3]
+    idx_min, idx_max = select_bounds(coeffs,bounds)
+
+    alpha = coeffs[idx_min:idx_max,0]
+    CD = coeffs[idx_min:idx_max,1]
+    CL = coeffs[idx_min:idx_max,2]
+    CM = coeffs[idx_min:idx_max,3]
 
     polar = Polar(alpha,CD,CL,CM)
 
@@ -42,9 +51,11 @@ def plot_coefficient(polar_data, polar_xfoil, name, show_plot):
     coeff_data = select_coefficient(polar_data,name)
     coeff_xfoil = select_coefficient(polar_xfoil,name)
 
-    ax.plot(polar_data.alpha,coeff_data,label="Data",marker="s",color=bluepoli1)
+    ax.plot(polar_data.alpha,coeff_data,label="Data",marker="s",color=bluepoli1,clip_on=False,zorder=5)
     ax.plot(polar_xfoil.alpha,coeff_xfoil,label="xfoil",color=bluepoli2,linestyle="--")
 
+    plt.xlim((np.min(polar_data.alpha),np.max(polar_data.alpha)))
+    plt.xticks(polar_data.alpha)
     plt.grid(True,linestyle="--",alpha=0.4)
     plt.legend()
     plt.xlabel(r"$\alpha$ [deg]")
@@ -59,6 +70,7 @@ def plot_polar(polar_data, polar_xfoil,show_plot):
     ax.plot(polar_data.CD,polar_data.CL,label="Data",marker="s",color=bluepoli1)
     ax.plot(polar_xfoil.CD,polar_xfoil.CL,label="xfoil",color=bluepoli2,linestyle="--")
 
+    # plt.xlim((0,0.065))
     plt.grid(True,linestyle="--",alpha=0.4)
     plt.legend()
     plt.xlabel("$C_D$ [-]")
@@ -79,8 +91,9 @@ if __name__ == "__main__":
     # show_plot = True
 
     # Import computed coefficients and xfoil coefficients
-    polar_data = import_coefficients(input_file)
-    polar_xfoil = import_coefficients("./Output/xfoil_coefficients.csv")
+    bounds = (-4,12)
+    polar_data = import_coefficients(input_file,bounds)
+    polar_xfoil = import_coefficients("./Output/xfoil_coefficients.csv",(-4,18))
 
     # Plot coefficients
     plot_coefficient(polar_data, polar_xfoil, "C_D", show_plot)
