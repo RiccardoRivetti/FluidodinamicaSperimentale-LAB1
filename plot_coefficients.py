@@ -81,8 +81,6 @@ if __name__ == "__main__":
     # Import computed coefficients and xfoil coefficients
     polar_data = import_coefficients(input_file)
     polar_xfoil = import_coefficients("./Output/xfoil_coefficients.csv")
-    # polar_xfoil.CM += polar_xfoil.CL/4
-    polar_xfoil.CM = -polar_xfoil.CM
 
     # Plot coefficients
     plot_coefficient(polar_data, polar_xfoil, "C_D", show_plot)
