@@ -84,7 +84,7 @@ def export_coefficients(filename, alpha, CD, CL, CM):
     np.savetxt(filename,results,delimiter=",",fmt="%.6e",header="alpha,CD,CL,CM",comments="")
 
 
-if __name__ == "__main__":
+def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("input_file", help="Path of the input data file")
     args = ap.parse_args()
@@ -107,3 +107,6 @@ if __name__ == "__main__":
     # Export load coefficients
     export_coefficients(output_folder+"/coefficients.csv", alpha, CD, CL, CM)
     print("Exported coefficients in "+output_folder)
+
+if __name__ == "__main__":
+    main()

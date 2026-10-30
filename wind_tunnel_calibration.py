@@ -8,7 +8,7 @@ bluepoli2 = "#0BA4FF"
 bluepoli3 = "#67B2C6"
 
 def get_pressure_data(filename):
-    data = np.loadtxt(wind_file, delimiter=",", skiprows=1)
+    data = np.loadtxt(filename, delimiter=",", skiprows=1)
 
     ch0 = data[:,3]
     ch1 = data[:,4]
@@ -53,7 +53,7 @@ def plot_regression(ch0, ch1, ch2, regr, output_folder,show_plot):
         plt.show()
 
 
-if __name__ == "__main__":
+def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("wind_file", help="Path of the wind data file")
     ap.add_argument("-s", type=float, default=200, help="Pressure tranducer sensitivity") 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     show_plot = args.plot
 
 
-    # wind_file = "./DataS_lo/wind_measure.csv"
+    # wind_file = "./Data/wind_measure.csv"
     output_folder = "./Calibration"
 
     # Extract pressure data
@@ -88,3 +88,6 @@ if __name__ == "__main__":
 
     # Plot regression
     plot_regression(ch0,ch1,ch2,regr,output_folder,show_plot)
+
+if __name__ == "__main__":
+    main()

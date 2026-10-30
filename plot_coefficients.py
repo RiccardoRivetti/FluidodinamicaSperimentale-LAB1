@@ -79,7 +79,7 @@ def plot_polar(polar_data, polar_xfoil,show_plot):
     if show_plot:
         plt.show()    
 
-if __name__ == "__main__":
+def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("input_file", help="Path of the input data file")
     ap.add_argument("--plot", action="store_true", help="Show plots")
@@ -102,3 +102,6 @@ if __name__ == "__main__":
 
     # Plot polar
     plot_polar(polar_data, polar_xfoil,show_plot)
+
+if __name__ == "__main__":
+    main()

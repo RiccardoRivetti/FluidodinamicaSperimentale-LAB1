@@ -97,7 +97,7 @@ def write_report(filename, K, E, rank_F, cond_F, F, S, input_file):
         print("normalized crosstalk =\n", K / np.diag(K)[None, :],file=f)
         
 
-if __name__ == "__main__":
+def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("weight_file", help="Path of the weight data file")
     args = ap.parse_args()
@@ -130,3 +130,6 @@ if __name__ == "__main__":
     # Write output report
     write_report(output_folder+"/LC_calibration_report.txt",K, E, rank_F, cond_F, F, S, weight_file)
     print("Load cell calibration report saved in " + output_folder)
+
+if __name__ == "__main__":
+    main()
