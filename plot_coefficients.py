@@ -68,15 +68,15 @@ def plot_polar(polar_data, polar_xfoil,show_plot):
         plt.show()    
 
 if __name__ == "__main__":
-    # ap = argparse.ArgumentParser()
-    # ap.add_argument("input_file", help="Path of the input data file")
-    # ap.add_argument("--plot", action="store_true", help="Show plots")
-    # args = ap.parse_args()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("input_file", help="Path of the input data file")
+    ap.add_argument("--plot", action="store_true", help="Show plots")
+    args = ap.parse_args()
 
-    # input_file = args.input_file
-    # show_plot = args.plot
-    input_file = "./Output/coefficients.csv"
-    show_plot = True
+    input_file = args.input_file
+    show_plot = args.plot
+    # input_file = "./Output/coefficients.csv"
+    # show_plot = True
 
     # Import computed coefficients and xfoil coefficients
     polar_data = import_coefficients(input_file)

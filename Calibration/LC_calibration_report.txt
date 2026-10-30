@@ -1,5 +1,5 @@
 LOAD CELL CALIBRATION
-Data: DATA/weights_measure.csv
+Data: Data/weights_measure.csv
 
 --- Checks on the fit ---
 rank(F) = 3
