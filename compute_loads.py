@@ -2,13 +2,22 @@ import numpy as np
 import argparse
 
 class Wing:
-    def __init__(self, airfoil, chord, span, thickness):
-        self.airfoil = airfoil
-        self.chord = chord
-        self.span = span
+    def __init__(self, airfoil, chord, span, thickness, shape_factor):
+        self.airfoil   = airfoil
+        self.chord     = chord
+        self.span      = span
         self.thickness = thickness # Percentage of chord
-        self.surface = chord*span
-        self.volume = chord*span*chord*thickness
+        self.surface   = chord*span
+        self.volume    = chord*span*chord*thickness
+        self.shape_factor = shape_factor
+
+class TestSection:
+    def __init__(self, length, width, height, pressure_gradient):
+        self.length = length
+        self.width  = width
+        self.height = height
+        self.area   = width*height
+        self.pressure_gradient = pressure_gradient
         
 
 def import_data(test_data):
@@ -34,13 +43,13 @@ def import_calibration(evaluation_matrix,WT_calibration):
 
     return E, K_WT
 
-def get_coefficients(DATA,ZERO,E,K_WT,tested_wing):
+def get_coefficients(DATA,ZERO,E,K_WT,test_wing):
     # Get vector of angles
     alpha = DATA[:,8]
 
     # Compute wing parameters
-    c = tested_wing.chord
-    S = tested_wing.surface
+    c = test_wing.chord
+    S = test_wing.surface
 
     # Compute loads in the zero wind condition
     S_zero = ZERO[0:3]
@@ -79,6 +88,33 @@ def get_coefficients(DATA,ZERO,E,K_WT,tested_wing):
 
     return CD, CL, CM, alpha
 
+def get_solid_blockage(test_wing, test_section):
+    K1 = 0.90
+    A = test_section.area # Test section area
+    V_mod = test_wing.volume # Volume of the wing
+
+    epsilon_sb = K1*V_mod/(A**1.5)
+
+    return epsilon_sb
+
+def get_wake_blockage(test_wing, test_section, CD):
+    c = test_wing.chord
+    h = test_section.area
+
+    epsilon_wb = c/(2*h)*CD
+
+    return epsilon_wb
+
+def get_buoyancy(test_wing, test_section, q):
+    lambda_2 = test_wing.shape_factor
+    t = test_wing.thickness*test_wing.chord
+    S = test_wing.surface
+    dP_dx = test_section.pressure_gradient
+
+    D_B = np.pi/2 * lambda_2 * t^2 * dP_dx * 1/(q*S)
+
+    return D_B
+
 def export_coefficients(filename, alpha, CD, CL, CM):
     CD = CD.T
     CL = CL.T
@@ -96,8 +132,9 @@ def main():
     # input_file = "./Data/airfoil_measure.csv"
     output_folder = "./Output"
 
-    # Define the tested wing
-    tested_wing = Wing("NACA0015",0.100,0.294,0.15)
+    # Define the experiment parameters
+    test_wing = Wing("NACA0015",0.100,0.294,0.15,3.43)
+    test_section = TestSection(1,0.3,0.45,10)
 
     # Import data and calibration parameters
     DATA, ZERO = import_data(input_file)
@@ -105,7 +142,7 @@ def main():
 
     # Compute load coefficients
     print("Computing coefficients...")
-    CD, CL, CM, alpha = get_coefficients(DATA,ZERO,E,K_WT,tested_wing)
+    CD, CL, CM, alpha = get_coefficients(DATA,ZERO,E,K_WT,test_wing)
 
     # Export load coefficients
     export_coefficients(output_folder+"/coefficients.csv", alpha, CD, CL, CM)
