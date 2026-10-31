@@ -2,10 +2,14 @@ import numpy as np
 import argparse
 
 class Wing:
-    def __init__(self, airfoil, chord, span):
+    def __init__(self, airfoil, chord, span, thickness):
         self.airfoil = airfoil
         self.chord = chord
         self.span = span
+        self.thickness = thickness # Percentage of chord
+        self.surface = chord*span
+        self.volume = chord*span*chord*thickness
+        
 
 def import_data(test_data):
     # Import test data
@@ -36,7 +40,7 @@ def get_coefficients(DATA,ZERO,E,K_WT,tested_wing):
 
     # Compute wing parameters
     c = tested_wing.chord
-    S = c*tested_wing.span
+    S = tested_wing.surface
 
     # Compute loads in the zero wind condition
     S_zero = ZERO[0:3]
@@ -83,7 +87,6 @@ def export_coefficients(filename, alpha, CD, CL, CM):
     results = np.column_stack([alpha,CD,CL,CM])
     np.savetxt(filename,results,delimiter=",",fmt="%.6e",header="alpha,CD,CL,CM",comments="")
 
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("input_file", help="Path of the input data file")
@@ -94,7 +97,7 @@ def main():
     output_folder = "./Output"
 
     # Define the tested wing
-    tested_wing = Wing("NACA0015",0.100,0.294)
+    tested_wing = Wing("NACA0015",0.100,0.294,0.15)
 
     # Import data and calibration parameters
     DATA, ZERO = import_data(input_file)
