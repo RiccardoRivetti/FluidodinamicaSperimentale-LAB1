@@ -43,7 +43,10 @@ def import_calibration(evaluation_matrix,WT_calibration):
 
     return E, K_WT
 
-def get_coefficients(DATA,ZERO,E,K_WT,test_wing):
+def get_dynamic_pressure(signal,K_WT):
+    return K_WT*signal
+
+def get_coefficients(DATA,ZERO,E,q,test_wing):
     # Get vector of angles
     alpha = DATA[:,8]
 
@@ -77,14 +80,10 @@ def get_coefficients(DATA,ZERO,E,K_WT,test_wing):
         L = -(-F[0,0]*np.sin(alpha_rad) + F[1,0]*np.cos(alpha_rad))
         M = -F[2,0]
 
-        # Compute dynamic pressure
-        q = K_WT*DATA[i,5]
-        # print(np.sqrt(q/(.5*1.225))*1.225*c/1.81e-5)
-
         # Compute coefficients
-        CD[i] = D/(q*S)
-        CL[i] = L/(q*S)
-        CM[i] = -(M/(q*S*c) + CL[i]/4)
+        CD[i] = D/(q[i]*S)
+        CL[i] = L/(q[i]*S)
+        CM[i] = -(M/(q[i]*S*c) + CL[i]/4)
 
     return CD, CL, CM, alpha
 
@@ -111,9 +110,40 @@ def get_buoyancy(test_wing, test_section, q):
     S = test_wing.surface
     dP_dx = test_section.pressure_gradient
 
-    D_B = np.pi/2 * lambda_2 * t^2 * dP_dx * 1/(q*S)
+    CD_B = np.pi/2 * lambda_2 * t**2 * dP_dx * 1/(q*S)
 
-    return D_B
+    return CD_B
+
+def get_corrections(CD, CL, CM, q, test_wing, test_section):
+    # Initialize corrected coefficients
+    n_coeffs = len(CD)
+    CD_corr = np.zeros(n_coeffs)
+    CL_corr = np.zeros(n_coeffs)
+    CM_corr = np.zeros(n_coeffs)
+
+    # Add corrections
+    for i in range(n_coeffs):
+        # Add horizontal buoyancy to CD
+        CD_B = get_buoyancy(test_wing, test_section, q[i])
+        CD_corr[i] = CD[i] - CD_B
+
+        # Compute correction parameters for blockage
+        c = test_wing.chord
+        h = test_section.height
+
+        epsilon_sb = get_solid_blockage(test_wing,test_section)
+        epsilon_wb = get_wake_blockage(test_wing,test_section,CD[i])
+        epsilon = epsilon_sb + epsilon_wb
+
+        sigma = (np.pi**2)/48 * (c**2)/(h**2)
+
+        # Add corrections to CL
+        CL_corr[i] = CL[i]*(1 - 2*epsilon - sigma)
+
+        # Add corrections to CM
+        CM_corr[i] = CM[i]*(1 - 2*epsilon) + 0.25*sigma*CL[i]
+
+    return CD_corr, CL_corr, CM_corr
 
 def export_coefficients(filename, alpha, CD, CL, CM):
     CD = CD.T
@@ -140,12 +170,20 @@ def main():
     DATA, ZERO = import_data(input_file)
     E, K_WT = import_calibration("./Calibration/E.csv","./Calibration/WT.csv")
 
+    # Compute vector of dynamic pressures
+    q = get_dynamic_pressure(DATA[:,5],K_WT)
+
     # Compute load coefficients
     print("Computing coefficients...")
-    CD, CL, CM, alpha = get_coefficients(DATA,ZERO,E,K_WT,test_wing)
+    CD, CL, CM, alpha = get_coefficients(DATA,ZERO,E,q,test_wing)
+
+    # Compute corrected coefficients
+    print("Computing corrections...")
+    CD_corr, CL_corr, CM_corr = get_corrections(CD, CL, CM, q, test_wing, test_section)
 
     # Export load coefficients
     export_coefficients(output_folder+"/coefficients.csv", alpha, CD, CL, CM)
+    export_coefficients(output_folder+"/coefficients_corrected.csv", alpha, CD_corr, CL_corr, CM_corr)
     print("Exported coefficients in "+output_folder)
 
 if __name__ == "__main__":
