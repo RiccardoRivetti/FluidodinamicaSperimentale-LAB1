@@ -38,7 +38,7 @@ def write_report(filename, input_file, regr, s):
         f.write(f"R^2 = {regr.rvalue**2:.6f}\n")
         f.write(f"standard error = {regr.stderr:.6f}\n")
 
-def plot_regression(ch0, ch1, ch2, regr, output_folder,show_plot):
+def plot_regression(ch0, ch1, ch2, regr,show_plot):
     x_data = ch2
     y_data = ch1-ch0
 
@@ -46,8 +46,8 @@ def plot_regression(ch0, ch1, ch2, regr, output_folder,show_plot):
     y_regr = regr.intercept + x_regr*regr.slope
 
     fig, ax = plt.subplots()
-    ax.scatter(x_data,y_data,label="Data",marker="s",color=bluepoli1,zorder=2)
-    ax.plot(x_regr,y_regr,label=f"Linear regression ($R^2 = {regr.rvalue**2:.6f}$)",
+    ax.scatter(x_data,y_data,label="Misura sperimentale",marker="s",color=bluepoli1,zorder=2)
+    ax.plot(x_regr,y_regr,label=f"Regressione lineare ($R^2 = {regr.rvalue**2:.6f}$)",
             color=bluepoli2,linestyle="--",zorder=1)
 
     ax.set_xlim(0,np.max(x_regr))
@@ -56,8 +56,8 @@ def plot_regression(ch0, ch1, ch2, regr, output_folder,show_plot):
     plt.xlabel("ch1 - ch0 [V]")
     plt.ylabel("ch2 [V]")
 
-    plt.savefig(output_folder+"/WT_regression.png", dpi=300, bbox_inches="tight")
-    plt.savefig(output_folder+"/WT_regression.pdf", bbox_inches="tight")
+    plt.savefig("./Figures/WT_regression.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./Figures/WT_regression.pdf", bbox_inches="tight")
 
     if show_plot:
         plt.show()
@@ -103,7 +103,7 @@ def main():
     print("Wind tunnel calibration report saved in " + output_folder)
 
     # Plot regression
-    plot_regression(ch0,ch1,ch2,regr,output_folder,show_plot)
+    plot_regression(ch0,ch1,ch2,regr,show_plot)
 
 if __name__ == "__main__":
     main()

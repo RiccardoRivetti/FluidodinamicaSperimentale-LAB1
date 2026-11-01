@@ -1,11 +1,11 @@
 class Wing:
-    def __init__(self, airfoil, chord, span, thickness, shape_factor):
+    def __init__(self, airfoil, chord, span, thickness, shape_factor, volume):
         self.airfoil   = airfoil
         self.chord     = chord
         self.span      = span
         self.thickness = thickness # Percentage of chord
         self.surface   = chord*span
-        self.volume    = chord*span*chord*thickness
+        self.volume    = volume
         self.shape_factor = shape_factor
 
 class TestSection:

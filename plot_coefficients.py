@@ -61,7 +61,7 @@ def plot_coefficient(polar_data, polar_xfoil, name, show_plot):
     coeff_data = select_coefficient(polar_data,name)
     coeff_xfoil = select_coefficient(polar_xfoil,name)
 
-    ax.plot(polar_data.alpha,coeff_data,label="Dato sperimentale",marker="s",color=bluepoli1,clip_on=False,zorder=5)
+    ax.plot(polar_data.alpha,coeff_data,label="Misura sperimentale",marker="s",color=bluepoli1,clip_on=False,zorder=5)
     ax.plot(polar_xfoil.alpha,coeff_xfoil,label="xfoil",color=bluepoli2,linestyle="--")
 
     plt.xlim((np.min(polar_data.alpha),np.max(polar_data.alpha)))
@@ -71,13 +71,16 @@ def plot_coefficient(polar_data, polar_xfoil, name, show_plot):
     plt.xlabel(r"$\alpha$ [deg]")
     plt.ylabel(f"${name}$ [-]")
 
+    plt.savefig(f"./Figures/{name}_alpha.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"./Figures/{name}_alpha.pdf", bbox_inches="tight")
+
     if show_plot:
         plt.show()
 
 def plot_polar(polar_data, polar_xfoil,show_plot):
     fig, ax = plt.subplots()
 
-    ax.plot(polar_data.CD,polar_data.CL,label="Dato sperimentale",marker="s",color=bluepoli1)
+    ax.plot(polar_data.CD,polar_data.CL,label="Misura sperimentale",marker="s",color=bluepoli1)
     ax.plot(polar_xfoil.CD,polar_xfoil.CL,label="xfoil",color=bluepoli2,linestyle="--")
 
     # plt.xlim((0,0.065))
@@ -85,6 +88,9 @@ def plot_polar(polar_data, polar_xfoil,show_plot):
     plt.legend()
     plt.xlabel("$C_D$ [-]")
     plt.ylabel("$C_L$ [-]")
+
+    plt.savefig("./Figures/polar.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./Figures/polar.pdf", bbox_inches="tight")
 
     if show_plot:
         plt.show()
@@ -94,8 +100,8 @@ def plot_uncertanties(polar_data, u_c, name, show_plot):
     
     coeff_data = select_coefficient(polar_data,name)
 
-    ax.plot(polar_data.alpha,coeff_data,label="Dato sperimentale",color=bluepoli1,clip_on=False,zorder=5)
-    ax.fill_between(polar_data.alpha, coeff_data-u_c, coeff_data+u_c, color=bluepoli1, alpha=.5, linewidth=0)
+    ax.plot(polar_data.alpha,coeff_data,label="Misura sperimentale",color=bluepoli1,clip_on=False,zorder=5)
+    ax.fill_between(polar_data.alpha, coeff_data-u_c, coeff_data+u_c, color=bluepoli1, alpha=.5, linewidth=0, label="Incertezza")
 
     plt.xlim((np.min(polar_data.alpha),np.max(polar_data.alpha)))
     plt.xticks(polar_data.alpha)
@@ -104,8 +110,35 @@ def plot_uncertanties(polar_data, u_c, name, show_plot):
     plt.xlabel(r"$\alpha$ [deg]")
     plt.ylabel(f"${name}$ [-]")
 
+    plt.savefig(f"./Figures/{name}_alpha_unc.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"./Figures/{name}_alpha_unc.pdf", bbox_inches="tight")
+
     if show_plot:
         plt.show()
+
+def plot_corrections(polar_data, polar_xfoil, polar_corrected, name, show_plot):
+    fig, ax = plt.subplots()
+
+    coeff_data = select_coefficient(polar_data,name)
+    coeff_xfoil = select_coefficient(polar_xfoil,name)
+    coeff_corrected = select_coefficient(polar_corrected,name)
+
+    ax.plot(polar_data.alpha,coeff_data,label="Misura sperimentale",marker="s",color=bluepoli1,clip_on=False,zorder=5)
+    ax.plot(polar_corrected.alpha,coeff_corrected,label="Correzione",marker="^",color=bluepoli3,clip_on=False,zorder=6)
+    ax.plot(polar_xfoil.alpha,coeff_xfoil,label="xfoil",color=bluepoli2,linestyle="--")
+
+    plt.xlim((np.min(polar_data.alpha),np.max(polar_data.alpha)))
+    plt.xticks(polar_data.alpha)
+    plt.grid(True,linestyle="--",alpha=0.4)
+    plt.legend()
+    plt.xlabel(r"$\alpha$ [deg]")
+    plt.ylabel(f"${name}$ [-]")
+
+    plt.savefig(f"./Figures/{name}_alpha_corr.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"./Figures/{name}_alpha_corr.pdf", bbox_inches="tight")
+
+    if show_plot:
+        plt.show()    
 
 def main():
     ap = argparse.ArgumentParser()
@@ -122,6 +155,7 @@ def main():
     bounds = (-4,12)
     polar_data = import_coefficients(input_file,bounds)
     polar_xfoil = import_coefficients("./Output/coefficients_xfoil.csv",(-4,18))
+    polar_corrected = import_coefficients("./Output/coefficients_corrected.csv",bounds)
 
     # Import uncertanties
     u_CD, u_CL = import_uncertanties("./Output/coefficients_uncertanties.csv",bounds)
@@ -137,6 +171,11 @@ def main():
     # Plot uncertainties
     plot_uncertanties(polar_data, u_CD, "C_D", show_plot)
     plot_uncertanties(polar_data, u_CL, "C_L", show_plot)
+
+    # Plot corrections
+    plot_corrections(polar_data, polar_xfoil, polar_corrected, "C_D", show_plot)
+    plot_corrections(polar_data, polar_xfoil, polar_corrected, "C_L", show_plot)
+    plot_corrections(polar_data, polar_xfoil, polar_corrected, "C_M", show_plot)
 
 if __name__ == "__main__":
     main()

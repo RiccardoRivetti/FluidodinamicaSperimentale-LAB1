@@ -102,7 +102,7 @@ def main():
     q = q_file[:,1]
 
     # Define wing
-    test_wing = Wing("NACA0015",0.100,0.294,0.15,3.43)
+    test_wing = Wing("NACA0015",0.100,0.294,0.15,3.43,0.030196676)
     
     # Extract signals
     S_on  = DATA[:,0:3]
