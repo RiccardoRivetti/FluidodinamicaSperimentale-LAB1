@@ -98,7 +98,7 @@ def get_solid_blockage(test_wing, test_section):
 
 def get_wake_blockage(test_wing, test_section, CD):
     c = test_wing.chord
-    h = test_section.area
+    h = test_section.height
 
     epsilon_wb = c/(2*h)*CD
 
@@ -168,7 +168,7 @@ def main():
 
     # Import data and calibration parameters
     DATA, ZERO = import_data(input_file)
-    E, K_WT = import_calibration("./Calibration/E.csv","./Calibration/WT.csv")
+    E, K_WT = import_calibration("./Calibration/E.csv","./Calibration/K_WT.csv")
 
     # Compute vector of dynamic pressures
     q = get_dynamic_pressure(DATA[:,5],K_WT)
@@ -182,7 +182,7 @@ def main():
     CD_corr, CL_corr, CM_corr = get_corrections(CD, CL, CM, q, test_wing, test_section)
 
     # Export load coefficients
-    export_coefficients(output_folder+"/coefficients.csv", alpha, CD, CL, CM)
+    export_coefficients(output_folder+"/coefficients_measured.csv", alpha, CD, CL, CM)
     export_coefficients(output_folder+"/coefficients_corrected.csv", alpha, CD_corr, CL_corr, CM_corr)
     print("Exported coefficients in "+output_folder)
 

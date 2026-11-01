@@ -93,7 +93,7 @@ def main():
     # Import computed coefficients and xfoil coefficients
     bounds = (-4,12)
     polar_data = import_coefficients(input_file,bounds)
-    polar_xfoil = import_coefficients("./Output/xfoil_coefficients.csv",(-4,18))
+    polar_xfoil = import_coefficients("./Output/coefficients_xfoil.csv",(-4,18))
 
     # Plot coefficients
     plot_coefficient(polar_data, polar_xfoil, "C_D", show_plot)
