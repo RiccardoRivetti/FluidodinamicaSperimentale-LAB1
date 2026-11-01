@@ -59,7 +59,11 @@ def get_coefficients(DATA,ZERO,E,q,test_wing):
     S_zero = S_zero.reshape(3,1)
     F_zero = E @ S_zero
 
-    # Initialize coefficients arrays
+    # Initialize loads and coefficients arrays
+    D = np.zeros(len(alpha))
+    L = np.zeros(len(alpha))
+    M = np.zeros(len(alpha))
+
     CD = np.zeros(len(alpha))
     CL = np.zeros(len(alpha))
     CM = np.zeros(len(alpha))
@@ -76,16 +80,16 @@ def get_coefficients(DATA,ZERO,E,q,test_wing):
 
         # Compute loads in wind axes
         alpha_rad = np.deg2rad(alpha[i])
-        D = -(F[0,0]*np.cos(alpha_rad) + F[1,0]*np.sin(alpha_rad))
-        L = -(-F[0,0]*np.sin(alpha_rad) + F[1,0]*np.cos(alpha_rad))
-        M = -F[2,0]
+        D[i] = -(F[0,0]*np.cos(alpha_rad) + F[1,0]*np.sin(alpha_rad))
+        L[i] = -(-F[0,0]*np.sin(alpha_rad) + F[1,0]*np.cos(alpha_rad))
+        M[i] = -F[2,0]
 
         # Compute coefficients
-        CD[i] = D/(q[i]*S)
-        CL[i] = L/(q[i]*S)
-        CM[i] = -(M/(q[i]*S*c) + CL[i]/4)
+        CD[i] = D[i]/(q[i]*S)
+        CL[i] = L[i]/(q[i]*S)
+        CM[i] = -(M[i]/(q[i]*S*c) + CL[i]/4)
 
-    return CD, CL, CM, alpha
+    return D, L, M, CD, CL, CM, alpha
 
 def get_solid_blockage(test_wing, test_section):
     K1 = 0.90
@@ -145,13 +149,13 @@ def get_corrections(CD, CL, CM, q, test_wing, test_section):
 
     return CD_corr, CL_corr, CM_corr
 
-def export_coefficients(filename, alpha, CD, CL, CM):
+def export_to_file(filename, alpha, CD, CL, CM, header):
     CD = CD.T
     CL = CL.T
     CM = CM.T
 
     results = np.column_stack([alpha,CD,CL,CM])
-    np.savetxt(filename,results,delimiter=",",fmt="%.6e",header="alpha,CD,CL,CM",comments="")
+    np.savetxt(filename,results,delimiter=",",fmt="%.6e",header=header,comments="")
 
 def main():
     ap = argparse.ArgumentParser()
@@ -175,15 +179,19 @@ def main():
 
     # Compute load coefficients
     print("Computing coefficients...")
-    CD, CL, CM, alpha = get_coefficients(DATA,ZERO,E,q,test_wing)
+    D, L, M, CD, CL, CM, alpha = get_coefficients(DATA,ZERO,E,q,test_wing)
 
     # Compute corrected coefficients
     print("Computing corrections...")
     CD_corr, CL_corr, CM_corr = get_corrections(CD, CL, CM, q, test_wing, test_section)
 
+    # Export loads
+    export_to_file(output_folder+"/loads_measured.csv", alpha, D, L, M,"alpha,D,L,M")
+    print("Exported loads in "+output_folder)
+
     # Export load coefficients
-    export_coefficients(output_folder+"/coefficients_measured.csv", alpha, CD, CL, CM)
-    export_coefficients(output_folder+"/coefficients_corrected.csv", alpha, CD_corr, CL_corr, CM_corr)
+    export_to_file(output_folder+"/coefficients_measured.csv", alpha, CD, CL, CM,"alpha,CD,CL,CM")
+    export_to_file(output_folder+"/coefficients_corrected.csv", alpha, CD_corr, CL_corr, CM_corr,"alpha,CD,CL,CM")
     print("Exported coefficients in "+output_folder)
 
 if __name__ == "__main__":
