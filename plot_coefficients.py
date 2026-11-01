@@ -34,6 +34,16 @@ def import_coefficients(filename,bounds):
 
     return polar
 
+def import_uncertanties(filename,bounds):
+    unc = np.loadtxt(filename,delimiter=",",skiprows=1)
+
+    idx_min, idx_max = select_bounds(unc,bounds)
+
+    u_CD = unc[idx_min:idx_max,1]
+    u_CL = unc[idx_min:idx_max,2]
+
+    return u_CD, u_CL
+
 def select_coefficient(polar,name):
     match name:
         case "C_D":
@@ -51,7 +61,7 @@ def plot_coefficient(polar_data, polar_xfoil, name, show_plot):
     coeff_data = select_coefficient(polar_data,name)
     coeff_xfoil = select_coefficient(polar_xfoil,name)
 
-    ax.plot(polar_data.alpha,coeff_data,label="Data",marker="s",color=bluepoli1,clip_on=False,zorder=5)
+    ax.plot(polar_data.alpha,coeff_data,label="Dato sperimentale",marker="s",color=bluepoli1,clip_on=False,zorder=5)
     ax.plot(polar_xfoil.alpha,coeff_xfoil,label="xfoil",color=bluepoli2,linestyle="--")
 
     plt.xlim((np.min(polar_data.alpha),np.max(polar_data.alpha)))
@@ -67,7 +77,7 @@ def plot_coefficient(polar_data, polar_xfoil, name, show_plot):
 def plot_polar(polar_data, polar_xfoil,show_plot):
     fig, ax = plt.subplots()
 
-    ax.plot(polar_data.CD,polar_data.CL,label="Data",marker="s",color=bluepoli1)
+    ax.plot(polar_data.CD,polar_data.CL,label="Dato sperimentale",marker="s",color=bluepoli1)
     ax.plot(polar_xfoil.CD,polar_xfoil.CL,label="xfoil",color=bluepoli2,linestyle="--")
 
     # plt.xlim((0,0.065))
@@ -77,7 +87,25 @@ def plot_polar(polar_data, polar_xfoil,show_plot):
     plt.ylabel("$C_L$ [-]")
 
     if show_plot:
-        plt.show()    
+        plt.show()
+
+def plot_uncertanties(polar_data, u_c, name, show_plot):
+    fig, ax = plt.subplots()
+    
+    coeff_data = select_coefficient(polar_data,name)
+
+    ax.plot(polar_data.alpha,coeff_data,label="Dato sperimentale",color=bluepoli1,clip_on=False,zorder=5)
+    ax.fill_between(polar_data.alpha, coeff_data-u_c, coeff_data+u_c, color=bluepoli1, alpha=.5, linewidth=0)
+
+    plt.xlim((np.min(polar_data.alpha),np.max(polar_data.alpha)))
+    plt.xticks(polar_data.alpha)
+    plt.grid(True,linestyle="--",alpha=0.4)
+    plt.legend()
+    plt.xlabel(r"$\alpha$ [deg]")
+    plt.ylabel(f"${name}$ [-]")
+
+    if show_plot:
+        plt.show()
 
 def main():
     ap = argparse.ArgumentParser()
@@ -95,6 +123,9 @@ def main():
     polar_data = import_coefficients(input_file,bounds)
     polar_xfoil = import_coefficients("./Output/coefficients_xfoil.csv",(-4,18))
 
+    # Import uncertanties
+    u_CD, u_CL = import_uncertanties("./Output/coefficients_uncertanties.csv",bounds)
+
     # Plot coefficients
     plot_coefficient(polar_data, polar_xfoil, "C_D", show_plot)
     plot_coefficient(polar_data, polar_xfoil, "C_L", show_plot)
@@ -102,6 +133,10 @@ def main():
 
     # Plot polar
     plot_polar(polar_data, polar_xfoil,show_plot)
+
+    # Plot uncertainties
+    plot_uncertanties(polar_data, u_CD, "C_D", show_plot)
+    plot_uncertanties(polar_data, u_CL, "C_L", show_plot)
 
 if __name__ == "__main__":
     main()
