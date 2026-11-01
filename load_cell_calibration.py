@@ -17,6 +17,7 @@ def get_hook_mass(data_weight,hook_file):
     s = s.reshape(3, 1)
     m_hook, res, rank, sv = np.linalg.lstsq(s, v_hook, rcond=None)
     m_hook = m_hook[0] # in kg
+    print(f"Hook mass = {m_hook:.6f}")
 
     return m_hook
 
@@ -47,7 +48,7 @@ def get_calibration_matrix(F,S):
 
     E = np.linalg.inv(K)
 
-    print("--- Generated calibration and evaluation matrices --")
+    print("Generated calibration and evaluation matrices.")
     # print("rank(F)=", rank)
     # print("cond(F)=", sv[0] / sv[-1])
 

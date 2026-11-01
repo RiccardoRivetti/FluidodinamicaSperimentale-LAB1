@@ -16,6 +16,16 @@ def get_pressure_data(filename):
 
     return ch0, ch1, ch2
 
+def compute_WT_data(ch0, ch1, ch2, s):
+    V1_V0 = (ch1 - ch0)
+    V2 = ch2
+
+    Delta_pwt = V2*s
+    q = V1_V0*s
+    ratio = q/Delta_pwt
+
+    return np.column_stack((V1_V0, V2,Delta_pwt,q,ratio))
+
 def write_report(filename, input_file, regr, s):
     with open(filename, "w") as f:
         f.write("WIND TUNNEL CALIBRATION\n")
@@ -64,7 +74,6 @@ def main():
     s = args.s
     show_plot = args.plot
 
-
     # wind_file = "./Data/wind_measure.csv"
     output_folder = "./Calibration"
 
@@ -75,12 +84,19 @@ def main():
     regr = stats.linregress(ch2,ch1-ch0)
     K = regr.slope
 
+    # Data analysis
+    DATA = compute_WT_data(ch0, ch1, ch2, s)
+
     # Results
     results = np.array([K, s, K*s])
     results = results.reshape(1,3)
-    np.savetxt(output_folder+"/WT.csv",results,delimiter=",",fmt="%.6e",
+    np.savetxt(output_folder+"/K_WT.csv",results,delimiter=",",fmt="%.6e",
                header="Voltage scaling,Sensitivity,Calibration coefficient",comments="")
     print("Wind tunnel calibration results saved in " + output_folder)
+
+    # Save data in a file
+    np.savetxt(output_folder+"/WT_Data.csv",DATA,delimiter=",",fmt="%.6e",header="V1-V0,V2,p1-p2,q,q/(p1-p2)",comments="")
+    print("Wind tunnel data saved in " + output_folder)
 
     # Write output report
     write_report(output_folder+"/WT_calibration_report.txt",wind_file,regr,s)
