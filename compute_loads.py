@@ -1,23 +1,6 @@
 import numpy as np
 import argparse
-
-class Wing:
-    def __init__(self, airfoil, chord, span, thickness, shape_factor):
-        self.airfoil   = airfoil
-        self.chord     = chord
-        self.span      = span
-        self.thickness = thickness # Percentage of chord
-        self.surface   = chord*span
-        self.volume    = chord*span*chord*thickness
-        self.shape_factor = shape_factor
-
-class TestSection:
-    def __init__(self, length, width, height, pressure_gradient):
-        self.length = length
-        self.width  = width
-        self.height = height
-        self.area   = width*height
-        self.pressure_gradient = pressure_gradient
+from experimental_setup import *
         
 
 def import_data(test_data):
@@ -193,6 +176,11 @@ def main():
     export_to_file(output_folder+"/coefficients_measured.csv", alpha, CD, CL, CM,"alpha,CD,CL,CM")
     export_to_file(output_folder+"/coefficients_corrected.csv", alpha, CD_corr, CL_corr, CM_corr,"alpha,CD,CL,CM")
     print("Exported coefficients in "+output_folder)
+
+    # Export dynamic pressure
+    np.savetxt(output_folder+"/dynamic_pressure.csv",np.column_stack((alpha,q)),
+               delimiter=",",fmt="%.6e",header="alpha,q",comments="")
+    print("Exported dynamic pressure in "+output_folder)
 
 if __name__ == "__main__":
     main()

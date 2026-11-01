@@ -55,7 +55,14 @@ def get_calibration_matrix(F,S):
     rank_F = rank
     cond_F = sv[0] / sv[-1]
 
-    return K, E, rank_F, cond_F
+    return K, E, rank_F, cond_F, res
+
+def get_fit_uncertainty(F, S, K):
+    R = S - F @ K.T                          # Signal residuals (N,3)
+    dof = F.shape[0] - F.shape[1]            # N - 3
+    Sigma = R.T @ R / dof                    # Residuals covariance (3,3)
+    FtF_inv = np.linalg.inv(F.T @ F)         # (3,3)
+    return Sigma, FtF_inv, dof
 
 def write_report(filename, K, E, rank_F, cond_F, F, S, input_file):
     with open(filename, "w") as f:
@@ -121,12 +128,17 @@ def main():
     S = get_signals_vector(DATA)
 
     # Build calibration and evaluation matrices
-    K, E, rank_F, cond_F = get_calibration_matrix(F,S)
+    K, E, rank_F, cond_F, res = get_calibration_matrix(F,S)
+    Sigma, FtF_inv, dof = get_fit_uncertainty(F, S, K)
 
     # Save output in files
     np.savetxt(output_folder+"/K.csv",K,delimiter=",",fmt="%.6e")
     np.savetxt(output_folder+"/E.csv",E,delimiter=",",fmt="%.6e")
     print("Load cell calibration and evaluation matrices saved in " + output_folder)
+
+    np.savez(output_folder + "/LC_calibration_uncertainty.npz",
+             K=K, E=E, Sigma=Sigma, FtF_inv=FtF_inv, dof=dof)
+    print("Load cell calibration calibration uncertanty saved in " + output_folder)
 
     # Write output report
     write_report(output_folder+"/LC_calibration_report.txt",K, E, rank_F, cond_F, F, S, weight_file)
