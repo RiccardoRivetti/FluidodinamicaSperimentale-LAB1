@@ -52,9 +52,9 @@ def plot_regression(ch0, ch1, ch2, regr,show_plot):
 
     ax.set_xlim(0,np.max(x_regr))
     plt.grid(True,linestyle="--",alpha=0.4)
-    plt.legend()
-    plt.xlabel("ch1 - ch0 [V]")
-    plt.ylabel("ch2 [V]")
+    plt.legend(fontsize=12,loc="upper left")
+    plt.xlabel("ch1 - ch0 [V]",fontsize=14)
+    plt.ylabel("ch2 [V]",fontsize=14)
 
     plt.savefig("./Figures/WT_regression.png", dpi=300, bbox_inches="tight")
     plt.savefig("./Figures/WT_regression.pdf", bbox_inches="tight")
