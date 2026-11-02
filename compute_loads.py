@@ -150,7 +150,7 @@ def main():
     output_folder = "./Output"
 
     # Define the experiment parameters
-    test_wing = Wing("NACA0015",0.100,0.294,0.15,3.43,0.030196676)
+    test_wing = Wing("NACA0015",0.100,0.294,0.15,3.43,3.00174e-4)
     test_section = TestSection(1,0.3,0.45,10)
 
     # Import data and calibration parameters
