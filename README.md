@@ -60,12 +60,12 @@ wind_tunnel_calibration.py ┘            ▲
 ### Requirements
 
 - Python 3.9 or later
-- NumPy, pandas, Matplotlib, SciPy
+- NumPy, Matplotlib, SciPy
 
 ```bash
 git clone https://github.com/RiccardoRivetti/FluidodinamicaSperimentale-LAB1.git
 cd FluidodinamicaSperimentale-LAB1
-pip install numpy pandas matplotlib scipy
+pip install numpy matplotlib scipy
 ```
 
 ### Running the analysis
